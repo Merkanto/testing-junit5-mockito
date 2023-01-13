@@ -1,4 +1,4 @@
-package merkanto.testingjunit5mockito;
+package merkanto;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
