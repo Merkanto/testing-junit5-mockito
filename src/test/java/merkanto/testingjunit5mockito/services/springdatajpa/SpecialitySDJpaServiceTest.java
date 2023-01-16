@@ -22,7 +22,7 @@ class SpecialitySDJpaServiceTest {
     SpecialtyRepository specialtyRepository;
 
     @InjectMocks
-    SpecialitySDJpaService specialitySDJpaService;
+    SpecialitySDJpaService service;
 
     @Test
     void testDeleteByObject() {
@@ -30,7 +30,7 @@ class SpecialitySDJpaServiceTest {
         Speciality speciality = new Speciality();
 
         //when
-        specialitySDJpaService.delete(speciality);
+        service.delete(speciality);
 
         //then
         then(specialtyRepository).should().delete(any(Speciality.class));
@@ -38,31 +38,16 @@ class SpecialitySDJpaServiceTest {
 
     @Test
     void findByIdTest() {
-        Speciality speciality = new Speciality();
-
-        when(specialtyRepository.findById(1L)).thenReturn(Optional.of(speciality));
-
-        Speciality foundSpeciality = specialitySDJpaService.findById(1L);
-
-        assertThat(foundSpeciality).isNotNull();
-
-        verify(specialtyRepository).findById(anyLong());
-    }
-
-    @Test
-    void findByIdBddTest() {
-
         //given
         Speciality speciality = new Speciality();
-
         given(specialtyRepository.findById(1L)).willReturn(Optional.of(speciality));
 
         //when
-        Speciality foundSpeciality = specialitySDJpaService.findById(1L);
+        Speciality foundSpecialty = service.findById(1L);
 
         //then
-        assertThat(foundSpeciality).isNotNull();
-        then(specialtyRepository).should().findById(anyLong());
+        assertThat(foundSpecialty).isNotNull();
+        then(specialtyRepository).should(timeout(100)).findById(anyLong());
         then(specialtyRepository).shouldHaveNoMoreInteractions();
     }
 
@@ -71,11 +56,11 @@ class SpecialitySDJpaServiceTest {
         //given - none
 
         //when
-        specialitySDJpaService.deleteById(1L);
-        specialitySDJpaService.deleteById(1L);
+        service.deleteById(1L);
+        service.deleteById(1L);
 
         //then
-        then(specialtyRepository).should(times(2)).deleteById(1L);
+        then(specialtyRepository).should(timeout(100).times(2)).deleteById(1L);
     }
 
     @Test
@@ -83,18 +68,18 @@ class SpecialitySDJpaServiceTest {
         //given
 
         //when
-        specialitySDJpaService.deleteById(1L);
-        specialitySDJpaService.deleteById(1L);
+        service.deleteById(1L);
+        service.deleteById(1L);
 
         //then
-        then(specialtyRepository).should(atLeastOnce()).deleteById(1L);
+        then(specialtyRepository).should(timeout(10).atLeastOnce()).deleteById(1L);
     }
 
     @Test
     void deleteByIdAtMost() {
         //when
-        specialitySDJpaService.deleteById(1L);
-        specialitySDJpaService.deleteById(1L);
+        service.deleteById(1L);
+        service.deleteById(1L);
 
         //then
         then(specialtyRepository).should(atMost(5)).deleteById(1L);
@@ -102,19 +87,21 @@ class SpecialitySDJpaServiceTest {
 
     @Test
     void deleteByIdNever() {
+
         //when
-        specialitySDJpaService.deleteById(1L);
-        specialitySDJpaService.deleteById(1L);
+        service.deleteById(1L);
+        service.deleteById(1L);
 
         //then
-        then(specialtyRepository).should(atLeastOnce()).deleteById(1L);
+        then(specialtyRepository).should(timeout(200).atLeastOnce()).deleteById(1L);
         then(specialtyRepository).should(never()).deleteById(5L);
+
     }
 
     @Test
     void testDelete() {
         //when
-        specialitySDJpaService.delete(new Speciality());
+        service.delete(new Speciality());
 
         //then
         then(specialtyRepository).should().delete(any());
@@ -133,7 +120,7 @@ class SpecialitySDJpaServiceTest {
     void testFindByIDThrows() {
         given(specialtyRepository.findById(1L)).willThrow(new RuntimeException("boom"));
 
-        assertThrows(RuntimeException.class, () -> specialitySDJpaService.findById(1L));
+        assertThrows(RuntimeException.class, () -> service.findById(1L));
 
         then(specialtyRepository).should().findById(1L);
     }
@@ -161,7 +148,7 @@ class SpecialitySDJpaServiceTest {
         given(specialtyRepository.save(argThat(argument -> argument.getDescription().equals(MATCH_ME)))).willReturn(savedSpecialty);
 
         //when
-        Speciality returnedSpecialty = specialitySDJpaService.save(speciality);
+        Speciality returnedSpecialty = service.save(speciality);
 
         //then
         assertThat(returnedSpecialty.getId()).isEqualTo(1L);
@@ -181,7 +168,7 @@ class SpecialitySDJpaServiceTest {
         given(specialtyRepository.save(argThat(argument -> argument.getDescription().equals(MATCH_ME)))).willReturn(savedSpecialty);
 
         //when
-        Speciality returnedSpecialty = specialitySDJpaService.save(speciality);
+        Speciality returnedSpecialty = service.save(speciality);
 
         //then
         assertNull(returnedSpecialty);
